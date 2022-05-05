@@ -7,11 +7,25 @@ const keyLayout = [
   "Shift", "z", "x", "c", "v", "b", "n", "m", ",", ".", "?", "/", "&uarr;",
   "Ctrl", "Win", "Alt", "&mdash;", "Alt", "Ctrl", "&larr;", "&darr;", "&rarr;"
 ]
+const keyLayoutShift = [
+  "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "backspace",
+  "Tab", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "{", "}", '|', "DEL",
+  "Caps", "A", "S", "D", "F", "G", "H", "J", "K", "L", ":", '"', "enter",
+  "Shift", "Z", "X", "C", "V", "B", "N", "M", "<", ">", "?", "/", "&uarr;",
+  "Ctrl", "Win", "Alt", "&mdash;", "Alt", "Ctrl", "&larr;", "&darr;", "&rarr;"
+]
 const keyLayoutRu = [
   "`", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "backspace",
   "Tab", "й", "ц", "у", "к", "е", "н", "г", "ш", "щ", "з", "х", "ъ", '\\', "DEL",
   "Caps", "ф", "ы", "в", "а", "п", "р", "о", "л", "д", "ж", "э", "enter",
   "Shift", "я", "ч", "с", "м", "и", "т", "ь", "б", "ю", ",", ".", "&uarr;",
+  "Ctrl", "Win", "Alt", "&mdash;", "Alt", "Ctrl", "&larr;", "&darr;", "&rarr;"
+]
+const keyLayoutRuShift = [
+  "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "backspace",
+  "Tab", "Й", "Ц", "У", "К", "Е", "Н", "Г", "Ш", "Щ", "З", "Х", "Ъ", '|', "DEL",
+  "Caps", "Ф", "Ы", "В", "А", "П", "Р", "О", "Л", "Д", "Ж", 'Э', "enter",
+  "Shift", "Я", "Ч", "С", "М", "И", "Т", "Ь", "Ь", "Б", "Ю", ",", "&uarr;",
   "Ctrl", "Win", "Alt", "&mdash;", "Alt", "Ctrl", "&larr;", "&darr;", "&rarr;"
 ]
 const endLineArray = ["backspace", "DEL", "enter", "&uarr;"]
@@ -83,6 +97,7 @@ function addElement() {
   }
 
   function whatButton(btn) {
+    console.log(btn);
     let low = btn.toLowerCase()
     let index
     for (let k in wideBtn) {
@@ -99,6 +114,10 @@ function addElement() {
       index = keyLayoutRu.indexOf(low)
       return pushButton(low, index)
     }
+    if (keyLayoutShift.includes(btn) || keyLayoutRuShift.includes(btn)) {
+      index = langFlag ? keyLayoutShift.indexOf(btn) : keyLayoutRuShift.indexOf(btn)
+      return pushButton(btn, index)
+    }
   }
   function pushButton(btn, indexKey) {
     // let indexKey = keyLayout.indexOf(btn)
@@ -112,12 +131,13 @@ function addElement() {
   document.addEventListener('keyup', (e) => {
     let pushKey = document.querySelector('.push')
     pushKey == null ? '' : pushKey.classList.remove('push')
+    langFlag ? shift(keyLayout, e.key) : shift(keyLayoutRu, e.key) 
   })
 
   // switch
   let capsFlag = false
   function switchCase(condition) {
-    console.log(condition);
+    // console.log(condition);
     switch (condition) {
       case "backspace":
         // textArea.focus();
@@ -137,7 +157,7 @@ function addElement() {
         textArea.value += "\n"
         break
       case "Shift":
-        textArea.value += ''
+        langFlag ? shift(keyLayoutShift, 'Shift') : shift(keyLayoutRuShift, 'Shift') 
         break
       case "Alt":
         textArea.value += ''
@@ -158,22 +178,36 @@ function addElement() {
       langFlag ? e.innerHTML = keyLayoutRu[i] : e.innerHTML = keyLayout[i]
     })
     langFlag ? `${langFlag = false, localStorage.setItem('lang', 'ru')}` : `${langFlag = true, localStorage.setItem('lang', 'eng')}`
-    
+    console.log(capsFlag);
+    if (capsFlag) {
+      capsFlag = false
+      caps()
+    }
   }
-
 
   const keysList = document.querySelectorAll('.key')
   function caps() {
     keysList.forEach(e => {
       if (e.outerText.length == 1 && `${!capsFlag ? e.outerText !== e.outerText.toUpperCase() : e.outerText !== e.outerText.toLowerCase()}`) {
         !capsFlag
-          ? e.innerHTML = e.outerText.toUpperCase()
-          : e.innerHTML = e.outerText.toLowerCase()
+        ? e.innerHTML = e.outerText.toUpperCase()
+        : e.innerHTML = e.outerText.toLowerCase()
       }
     })
     !capsFlag ? capsFlag = true : capsFlag = false
+    console.log(capsFlag);
   }
 
+  function shift(arr, btn) {
+    if (btn !== 'Shift') return
+    keysList.forEach((e,i)=>{
+      e.innerHTML = arr[i]
+    })
+    if (capsFlag) {
+      capsFlag = false
+      caps()
+    }
+  }
   // double push
   function twoKeysDown(func, ...codes) {
     let pressed = new Set()
