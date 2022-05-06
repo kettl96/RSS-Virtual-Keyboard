@@ -74,6 +74,7 @@ function addElement() {
 
   // add value
   function presButton(e) {
+    if (e.key == undefined) return
     switchCase(e.target.outerText)
   }
   keyBoardContainer.addEventListener('click', presButton)
@@ -92,12 +93,12 @@ function addElement() {
     'ArrowDown': "&darr;",
     'ArrowLeft': "&larr;",
     'ArrowRight': "&rarr;",
-    'Shift' : 'Shift',
+    'Shift': 'Shift',
     'Alt': 'Alt'
   }
 
   function whatButton(btn) {
-    console.log(btn);
+    // console.log(cursorPosition);
     let low = btn.toLowerCase()
     let index
     for (let k in wideBtn) {
@@ -126,12 +127,16 @@ function addElement() {
     keys[indexKey].classList.add('push')
     switchCase(keys[indexKey].outerText)
   }
-  document.addEventListener('keydown', (e) => whatButton(e.key))
+  document.addEventListener('keydown', (e) => {
+    e.preventDefault()
+    whatButton(e.key)
+  }
+  )
 
   document.addEventListener('keyup', (e) => {
     let pushKey = document.querySelector('.push')
     pushKey == null ? '' : pushKey.classList.remove('push')
-    langFlag ? shift(keyLayout, e.key) : shift(keyLayoutRu, e.key) 
+    langFlag ? shift(keyLayout, e.key) : shift(keyLayoutRu, e.key)
   })
 
   // switch
@@ -157,7 +162,7 @@ function addElement() {
         textArea.value += "\n"
         break
       case "Shift":
-        langFlag ? shift(keyLayoutShift, 'Shift') : shift(keyLayoutRuShift, 'Shift') 
+        langFlag ? shift(keyLayoutShift, 'Shift') : shift(keyLayoutRuShift, 'Shift')
         break
       case "Alt":
         textArea.value += ''
@@ -173,7 +178,7 @@ function addElement() {
   }
   function changeLang() {
     textArea.value += ''
-    
+
     keysList.forEach((e, i) => {
       langFlag ? e.innerHTML = keyLayoutRu[i] : e.innerHTML = keyLayout[i]
     })
@@ -190,8 +195,8 @@ function addElement() {
     keysList.forEach(e => {
       if (e.outerText.length == 1 && `${!capsFlag ? e.outerText !== e.outerText.toUpperCase() : e.outerText !== e.outerText.toLowerCase()}`) {
         !capsFlag
-        ? e.innerHTML = e.outerText.toUpperCase()
-        : e.innerHTML = e.outerText.toLowerCase()
+          ? e.innerHTML = e.outerText.toUpperCase()
+          : e.innerHTML = e.outerText.toLowerCase()
       }
     })
     !capsFlag ? capsFlag = true : capsFlag = false
@@ -200,7 +205,7 @@ function addElement() {
 
   function shift(arr, btn) {
     if (btn !== 'Shift') return
-    keysList.forEach((e,i)=>{
+    keysList.forEach((e, i) => {
       e.innerHTML = arr[i]
     })
     if (capsFlag) {
