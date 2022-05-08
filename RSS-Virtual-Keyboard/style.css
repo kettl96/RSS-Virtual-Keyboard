@@ -1,0 +1,78 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; */
+  align-items: center;
+}
+textarea {
+  width: 60%;
+  height: 100px;
+  
+}
+.keyBoard_container {
+  border: 1px solid black;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 15px;
+  width: 705px;
+  height: 240px;
+  background-color: rgb(233, 233, 233);
+  align-items: center;
+  justify-content: center;
+}
+.key {
+  width: 40px;
+  height: 40px;
+  background-color: black;
+  color: aliceblue;
+  margin: 3px;
+  cursor: pointer;
+  transition: 0.1s;
+}
+.key:active {
+  background-color: gray;
+  border-radius: 30%;
+}
+.text_info {
+  font-size: 20px;
+  max-width: 500px;
+  font-weight: 500;
+  line-height: 40px;
+  text-align: center;
+}
+.link_rep {
+  position: absolute;
+  bottom: 5%;
+}
+
+/* size btn */
+.oversize_0 {
+  width: 95px;
+}
+.oversize_1 {
+  width: 50px;
+}
+.oversize_2 {
+  width: 65px;
+}
+.oversize_3 {
+  width: 117px;
+}
+.oversize_4 {
+  width: 85px;
+}
+.oversize_5 {
+  margin-left: 12px;
+}
+.oversize_6, .oversize_7, .oversize_8 {
+  width: 50px;
+}
+.oversize_9 {
+  width: 293px;
+}
+
+/* push */
+.push {
+  background-color: gray;
+  border-radius: 30%;
+}
