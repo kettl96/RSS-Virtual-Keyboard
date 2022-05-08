@@ -31,6 +31,13 @@ const keyLayoutRuShift = [
 const endLineArray = ["backspace", "DEL", "enter", "&uarr;"]
 const overSizeBtn = ["Ctrl", "Tab", "Caps", "&mdash;", "backspace", "enter", "Shift", "&uarr;", "Win", "Alt", "&mdash;"]
 
+let cursor = {
+  cursorPosition: null,
+  letterInString: null,
+  indexInString: null,
+  currentPositionInString: null
+}
+
 let langFlag = true
 let sizeBtnCount = 0
 function addElement() {
@@ -38,8 +45,6 @@ function addElement() {
   wrapper.classList.add('wrapper')
   document.body.prepend(wrapper)
   let textArea = document.createElement('textarea')
-
-  // textArea.setAttribute('readonly', 'readonly')
   wrapper.prepend(textArea)
   let keyBoardContainer = document.createElement('div')
   keyBoardContainer.classList.add('keyBoard_container')
@@ -47,7 +52,15 @@ function addElement() {
   let textInfo = document.createElement('div')
   textInfo.classList.add('text_info')
   wrapper.append(textInfo)
-  textInfo.innerHTML = 'Клавиатура создана в операционной системе Windows  Для переключения языка комбинация: Shift + Alt'
+  textInfo.innerHTML = 'Keyboard create on OS Windows <br> For change language: Shift + Alt or Click "Shift" then "Alt" '
+  let linkRepo = document.createElement('div')
+  linkRepo.classList.add('link_rep')
+  wrapper.append(linkRepo)
+  let linkA = document.createElement('a')
+  linkA.href = 'https://github.com/kettl96/RSS-Virtual-Keyboard'
+  linkA.title = 'GH-repo'
+  linkA.appendChild(document.createTextNode('GitHub - Repositori'))
+  linkRepo.appendChild(linkA)
 
   let langStore = localStorage.getItem('lang')
   langStore == 'ru' ? `${createButton(keyLayoutRu), langFlag = false}` : `${createButton(keyLayout), langFlag = true}`
@@ -73,7 +86,25 @@ function addElement() {
   }
 
   // add value
+  let shiftClick = false
   function presButton(e) {
+    if (e.target.outerText.length > 10) return
+    if (e.target.outerText == 'Shift') {
+      if (!shiftClick) {
+        e.target.classList.add('push')
+        shiftClick = true
+        return langFlag ? shift(keyLayoutShift, 'Shift') : shift(keyLayoutRuShift, 'Shift')
+      } else {
+        e.target.classList.remove('push')
+        shiftClick = false
+        return langFlag ? shift(keyLayout, 'Shift') : shift(keyLayoutRu, 'Shift')
+      }
+    }
+    if (shiftClick) {
+      shiftClick = false
+      document.querySelector('.push').classList.remove('push')
+      return changeLang()
+    } 
     switchCase(e.target.outerText)
   }
   keyBoardContainer.addEventListener('click', presButton)
@@ -92,12 +123,11 @@ function addElement() {
     'ArrowDown': "&darr;",
     'ArrowLeft': "&larr;",
     'ArrowRight': "&rarr;",
-    'Shift' : 'Shift',
-    'Alt': 'Alt'
+    'Shift': 'Shift',
+    'Alt': 'Alt',
   }
 
   function whatButton(btn) {
-    console.log(btn);
     let low = btn.toLowerCase()
     let index
     for (let k in wideBtn) {
@@ -120,65 +150,79 @@ function addElement() {
     }
   }
   function pushButton(btn, indexKey) {
-    // let indexKey = keyLayout.indexOf(btn)
-    // indexKey == undefined ? indexKey = keyLayoutRu.indexOf(btn) :  indexKey = keyLayout.indexOf(btn)
     let keys = document.querySelectorAll('.key')
     keys[indexKey].classList.add('push')
     switchCase(keys[indexKey].outerText)
   }
-  document.addEventListener('keydown', (e) => whatButton(e.key))
+  document.addEventListener('keydown', (e) => {
+    e.preventDefault()
+    whatButton(e.key)
+  })
 
   document.addEventListener('keyup', (e) => {
     let pushKey = document.querySelector('.push')
     pushKey == null ? '' : pushKey.classList.remove('push')
-    langFlag ? shift(keyLayout, e.key) : shift(keyLayoutRu, e.key) 
+    langFlag ? shift(keyLayout, e.key) : shift(keyLayoutRu, e.key)
   })
 
   // switch
   let capsFlag = false
+
   function switchCase(condition) {
-    // console.log(condition);
+    textArea.focus();
+    updateCursorPosition();
     switch (condition) {
       case "backspace":
-        // textArea.focus();
-
-        textArea.value = textArea.value.substring(0, textArea.value.length - 1)
-        // backspace()
+        if (cursor.cursorPosition > 0) {
+          textArea.value = (textArea.value).split('').filter((char, index) => index !== cursor.cursorPosition - 1).join('')
+          cursor.cursorPosition -= 1
+          updateCursorPosition()
+        }
         break
       case "Tab":
-        textArea.value += '  '
+        textArea.value = `${textArea.value.slice(0, cursor.cursorPosition)}  ${textArea.value.slice(cursor.cursorPosition)}`
+        cursor.cursorPosition += 2
+        updateCursorPosition()
         break
-      // case "DEL":
-      // break
+      case "DEL":
+        textArea.value = (textArea.value).split('').filter((char, index) => index !== cursor.cursorPosition).join('')
+        updateCursorPosition()
+        break
       case "Caps":
         caps()
         break
       case "enter":
-        textArea.value += "\n"
+        textArea.value = `${textArea.value.slice(0, cursor.cursorPosition)}\n${textArea.value.slice(cursor.cursorPosition)}`
+        cursor.cursorPosition += 1
+        updateCursorPosition()
         break
       case "Shift":
-        langFlag ? shift(keyLayoutShift, 'Shift') : shift(keyLayoutRuShift, 'Shift') 
+        langFlag ? shift(keyLayoutShift, 'Shift') : shift(keyLayoutRuShift, 'Shift')
+        break
+      case "—":
+        textArea.value = `${textArea.value.slice(0, cursor.cursorPosition)} ${textArea.value.slice(cursor.cursorPosition)}`
+        cursor.cursorPosition += 1
+        updateCursorPosition()
         break
       case "Alt":
-        textArea.value += ''
         break
       case "Ctrl":
-        textArea.value += ''
         break
-
       default:
-        if (capsFlag) textArea.value += condition.toUpperCase()
-        else textArea.value += condition
+        textArea.value = `${textArea.value.slice(0, cursor.cursorPosition)}${condition}${textArea.value.slice(cursor.cursorPosition)}`
+        cursor.cursorPosition += 1
+        textArea.selectionStart = cursor.cursorPosition
+        textArea.selectionEnd = cursor.cursorPosition
     }
   }
+
   function changeLang() {
     textArea.value += ''
-    
+
     keysList.forEach((e, i) => {
       langFlag ? e.innerHTML = keyLayoutRu[i] : e.innerHTML = keyLayout[i]
     })
     langFlag ? `${langFlag = false, localStorage.setItem('lang', 'ru')}` : `${langFlag = true, localStorage.setItem('lang', 'eng')}`
-    console.log(capsFlag);
     if (capsFlag) {
       capsFlag = false
       caps()
@@ -190,17 +234,16 @@ function addElement() {
     keysList.forEach(e => {
       if (e.outerText.length == 1 && `${!capsFlag ? e.outerText !== e.outerText.toUpperCase() : e.outerText !== e.outerText.toLowerCase()}`) {
         !capsFlag
-        ? e.innerHTML = e.outerText.toUpperCase()
-        : e.innerHTML = e.outerText.toLowerCase()
+          ? e.innerHTML = e.outerText.toUpperCase()
+          : e.innerHTML = e.outerText.toLowerCase()
       }
     })
     !capsFlag ? capsFlag = true : capsFlag = false
-    console.log(capsFlag);
   }
 
   function shift(arr, btn) {
     if (btn !== 'Shift') return
-    keysList.forEach((e,i)=>{
+    keysList.forEach((e, i) => {
       e.innerHTML = arr[i]
     })
     if (capsFlag) {
@@ -226,31 +269,15 @@ function addElement() {
   }
   twoKeysDown(() => changeLang(), 'ShiftLeft', 'AltLeft')
 
+  // textArea cur
 
-  function backspace() {
-    textArea.se
-    var ss = textArea.selectionStart;
-    var se = textArea.selectionEnd;
-    var ln = textArea.value.length;
+  textArea.addEventListener('click', (e) => {
+    cursor.cursorPosition = e.target.selectionStart
+  })
 
-    var textbefore = textArea.value.substring(0, ss)
-    var textselected = textArea.value.substring(ss, se)
-    var textafter = textArea.value.substring(se, ln)
-
-    if (ss == se) {
-      textArea.value = textArea.value.substring(0, textArea.value.length - 1)
-      textArea.focus();
-      textArea.selectionStart = ss - 1;
-      textArea.selectionEnd = ss - 1;
-    } else {
-      textArea.value = textbefore + textafter;
-      textArea.focus();
-      textArea.selectionStart = ss;
-      textArea.selectionEnd = ss;
-    }
-
+  function updateCursorPosition() {
+    textArea.selectionStart = cursor.cursorPosition;
+    textArea.selectionEnd = cursor.cursorPosition;
   }
-  // document.addEventListener('keydown', (e) => textArea.value='')
-
 
 }

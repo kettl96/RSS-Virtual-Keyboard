@@ -10,6 +10,8 @@ textarea {
   
 }
 .keyBoard_container {
+  border: 1px solid black;
+  border-radius: 5px;
   padding: 10px;
   margin: 15px;
   width: 705px;
@@ -38,7 +40,10 @@ textarea {
   line-height: 40px;
   text-align: center;
 }
-
+.link_rep {
+  position: absolute;
+  bottom: 5%;
+}
 
 /* size btn */
 .oversize_0 {
