@@ -52,7 +52,15 @@ function addElement() {
   let textInfo = document.createElement('div')
   textInfo.classList.add('text_info')
   wrapper.append(textInfo)
-  textInfo.innerHTML = 'Клавиатура создана в операционной системе Windows  Для переключения языка комбинация: Shift + Alt'
+  textInfo.innerHTML = 'Keyboard create on OS Windows <br> For change language: Shift + Alt or Click "Shift" then "Alt" '
+  let linkRepo = document.createElement('div')
+  linkRepo.classList.add('link_rep')
+  wrapper.append(linkRepo)
+  let linkA = document.createElement('a')
+  linkA.href = 'https://github.com/kettl96/RSS-Virtual-Keyboard'
+  linkA.title = 'GH-repo'
+  linkA.appendChild(document.createTextNode('GitHub - Repositori'))
+  linkRepo.appendChild(linkA)
 
   let langStore = localStorage.getItem('lang')
   langStore == 'ru' ? `${createButton(keyLayoutRu), langFlag = false}` : `${createButton(keyLayout), langFlag = true}`
@@ -78,8 +86,25 @@ function addElement() {
   }
 
   // add value
+  let shiftClick = false
   function presButton(e) {
-    if (e.key == undefined) return
+    if (e.target.outerText.length > 10) return
+    if (e.target.outerText == 'Shift') {
+      if (!shiftClick) {
+        e.target.classList.add('push')
+        shiftClick = true
+        return langFlag ? shift(keyLayoutShift, 'Shift') : shift(keyLayoutRuShift, 'Shift')
+      } else {
+        e.target.classList.remove('push')
+        shiftClick = false
+        return langFlag ? shift(keyLayout, 'Shift') : shift(keyLayoutRu, 'Shift')
+      }
+    }
+    if (shiftClick) {
+      shiftClick = false
+      document.querySelector('.push').classList.remove('push')
+      return changeLang()
+    } 
     switchCase(e.target.outerText)
   }
   keyBoardContainer.addEventListener('click', presButton)
@@ -198,7 +223,6 @@ function addElement() {
       langFlag ? e.innerHTML = keyLayoutRu[i] : e.innerHTML = keyLayout[i]
     })
     langFlag ? `${langFlag = false, localStorage.setItem('lang', 'ru')}` : `${langFlag = true, localStorage.setItem('lang', 'eng')}`
-    console.log(capsFlag);
     if (capsFlag) {
       capsFlag = false
       caps()
@@ -215,7 +239,6 @@ function addElement() {
       }
     })
     !capsFlag ? capsFlag = true : capsFlag = false
-    console.log(capsFlag);
   }
 
   function shift(arr, btn) {

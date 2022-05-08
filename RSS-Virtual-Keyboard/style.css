@@ -40,7 +40,10 @@ textarea {
   line-height: 40px;
   text-align: center;
 }
-
+.link_rep {
+  position: absolute;
+  bottom: 5%;
+}
 
 /* size btn */
 .oversize_0 {
